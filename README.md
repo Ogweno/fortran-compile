@@ -1,6 +1,6 @@
 ### Compile Fortran program files
 
-**compile** is a shell script which compiles Fortran files using `gfortran`. It can be invoked in the command-line as
+**compile** is a shell script which compiles Fortran files using `gfortran`. It is particularly useful when there are a vast number of module files, which is the case for large programs. **compile** automatically takes care of all these module files during compilation.  It can be invoked in the command-line as
 
 `pauls:~$ compile mainfortranfile.f90`
 
