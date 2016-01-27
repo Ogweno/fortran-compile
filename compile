@@ -1,0 +1,62 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]
+then
+    echo "compile: missing file name"
+    exit
+fi
+
+while [ $# = 1 ]
+do
+    if [ -f $1 ] && [[ $1 = main* ]]
+    then 
+	awk '$1 ~ /use/ {print $2}' $1 > tmpfileawk
+	modulecount=`awk 'END { print NR}' tmpfileawk`
+	if [ $modulecount -ge 1 ]
+	then
+	    i=1
+	    while [ $i -le $modulecount ]
+	    do
+		x[$i]=`awk -v j="$i" 'NR==j' tmpfileawk`.f90
+		i=$(( i+1 ))
+	    done
+	    rm tmpfileawk
+	    gfortran -c ${x[@]} 
+	    gfortran $1 ${x[@]} /usr/lib/liblapack.so.3 \
+		/usr/lib/libblas.so.3 /usr/local/bin/libslatec.so \
+		/usr/local/bin/libmiscf90.so
+	    exit
+	else
+	    gfortran $1 /usr/lib/liblapack.so.3 /usr/lib/libblas.so.3 \
+		/usr/local/bin/libslatec.so /usr/local/bin/libmiscf90.so 
+	    exit
+	fi
+    elif [ -f $1 ] && [[ $1 != main* ]]
+	then 
+	awk '$1 ~ /use/ {print $2}' $1 > tmpfileawk
+	modulecount=`awk 'END { print NR}' tmpfileawk`
+	if [ $modulecount -ge 1 ]
+	then
+	    i=1
+	    while [ $i -le $modulecount ]
+	    do
+		x[$i]=`awk -v j="$i" 'NR==j' tmpfileawk`.f90
+		i=$(( i+1 ))
+	    done
+	    rm tmpfileawk
+	    gfortran -c ${x[@]} 
+	    gfortran -c $1 ${x[@]} 
+	    exit
+	fi
+    else
+	echo "compile: file does not exist"
+	exit
+    fi
+done
+
+if [ $# -gt 1 ]
+then
+    gfortran $@ /usr/lib/liblapack.so.3 /usr/lib/libblas.so.3 \
+	/usr/local/bin/libslatec.so /usr/local/bin/libmiscf90.so
+fi
+    
